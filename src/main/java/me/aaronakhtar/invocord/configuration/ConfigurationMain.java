@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class ConfigurationMain {
 
-    protected static final Gson gson = new Gson();
+    public static final Gson gson = new Gson();
     protected static final File configurationDirectory = new File("./" + Invocord.name);
     public static final File mainConfigurationFile = new File(configurationDirectory.getAbsolutePath() + "/config.json");
 
@@ -54,6 +54,17 @@ public class ConfigurationMain {
 
     private String blockonomicsApiKey = "";
     private String discordBotToken = "";
+    private String secretKey = "";
+    private int port = 23019;
+
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public int getPort() {
+        return port;
+    }
 
     public String getBlockonomicsApiKey() {
         return blockonomicsApiKey;

@@ -5,10 +5,14 @@ import me.aaronakhtar.blockonomics_wrapper.objects.BlockonomicsCallbackSettings;
 import me.aaronakhtar.blockonomics_wrapper.objects.transaction.CallbackTransaction;
 import me.aaronakhtar.invocord.GeneralUtilities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static me.aaronakhtar.invocord.Invocord.blockonomics;
 
 public class TransactionListener extends Thread {
     public static volatile boolean listen = false;
+    public static final List<CallbackTransaction> transactions = new ArrayList<>();
 
     private int callbackPort;
     private BlockonomicsCallbackSettings blockonomicsCallbackSettings;
@@ -23,7 +27,11 @@ public class TransactionListener extends Thread {
         return new Runnable() {
             @Override
             public void run() {
-                //todo - handle transaction
+                transactions.add(transaction);
+
+
+                //todo - check for invoices etc
+
             }
         };
     }
