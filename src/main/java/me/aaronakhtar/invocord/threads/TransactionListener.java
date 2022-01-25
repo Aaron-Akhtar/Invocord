@@ -46,6 +46,7 @@ public class TransactionListener extends Thread {
         try{
             Blockonomics.startCallbackServer(new BlockonomicsCallbackSettings[]{blockonomicsCallbackSettings}, callbackPort);
             try(AutoCloseable autoCloseable = () -> Blockonomics.stopCallbackServer()){
+                GeneralUtilities.log("Listening for new transactions...");
                 while(listen){
                     final CallbackTransaction transaction = blockonomics.listenForNewTransaction();
                     if (transaction != null){

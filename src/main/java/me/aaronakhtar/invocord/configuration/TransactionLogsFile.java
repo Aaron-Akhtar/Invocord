@@ -11,22 +11,22 @@ import java.util.List;
 
 public class TransactionLogsFile {
 
-    private static final File transactionConfigurationFile = new File(ConfigurationMain.configurationDirectory.getAbsolutePath() + "/transactions.json");
+    private static final File transactionLogsFile = new File(ConfigurationMain.configurationDirectory.getAbsolutePath() + "/transactions.json");
     private static volatile boolean updatingLogs = false;
 
     public static File getTransactionConfigurationFile() {
         try {
-            ConfigurationMain.checkConfigurationFile(transactionConfigurationFile);
+            ConfigurationUtilities.checkConfigurationFile(transactionLogsFile);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return transactionConfigurationFile;
+        return transactionLogsFile;
     }
 
     public static synchronized void updateTransactionLog(List<CallbackTransaction> transactions) {
         updatingLogs = true;
 
-        try (FileWriter fileWriter = new FileWriter(transactionConfigurationFile)) {
+        try (FileWriter fileWriter = new FileWriter(transactionLogsFile)) {
             ConfigurationMain.gson.toJson(ConfigurationMain.gson.toJson(transactions), fileWriter);
             fileWriter.flush();
         } catch (Exception e) {
@@ -47,7 +47,7 @@ public class TransactionLogsFile {
 
         List<CallbackTransaction> transactions = new ArrayList<>();
         CallbackTransaction[] callbackTransactions = null;
-        try (FileReader fileReader = new FileReader(transactionConfigurationFile)) {
+        try (FileReader fileReader = new FileReader(transactionLogsFile)) {
             callbackTransactions = ConfigurationMain.gson.fromJson(fileReader, CallbackTransaction[].class);
         } catch (Exception e) {
             e.printStackTrace();

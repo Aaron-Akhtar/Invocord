@@ -1,6 +1,7 @@
 package me.aaronakhtar.invocord.configuration;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import me.aaronakhtar.invocord.Invocord;
 
 import java.io.File;
@@ -10,22 +11,9 @@ import java.io.IOException;
 
 public class ConfigurationMain {
 
-    public static final Gson gson = new Gson();
+    public static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     protected static final File configurationDirectory = new File("./" + Invocord.name);
     public static final File mainConfigurationFile = new File(configurationDirectory.getAbsolutePath() + "/config.json");
-
-    // returns true if its created a new file, and returns false if the file already existed
-    public static boolean checkConfigurationFile(File configurationFile) throws IOException {
-        if (!ConfigurationMain.configurationDirectory.isDirectory()) {
-            configurationDirectory.mkdirs();
-            configurationFile.createNewFile();
-            return true;
-        }else if (!configurationFile.exists()){
-            configurationFile.createNewFile();
-            return true;
-        }
-        return false;
-    }
 
     public static boolean setupMainConfiguration(){
         try(FileWriter fileWriter = new FileWriter(mainConfigurationFile)){
@@ -40,7 +28,7 @@ public class ConfigurationMain {
 
     public static ConfigurationMain getMainConfiguration(){
         try {
-            checkConfigurationFile(mainConfigurationFile);
+            ConfigurationUtilities.checkConfigurationFile(mainConfigurationFile);
             try (FileReader fileReader = new FileReader(mainConfigurationFile)) {
                 return gson.fromJson(fileReader, ConfigurationMain.class);
             } catch (Exception e) {
