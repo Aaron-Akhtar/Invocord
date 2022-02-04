@@ -1,9 +1,12 @@
 package me.aaronakhtar.invocord.threads;
 
 import me.aaronakhtar.blockonomics_wrapper.Blockonomics;
+import me.aaronakhtar.blockonomics_wrapper.BlockonomicsUtilities;
 import me.aaronakhtar.blockonomics_wrapper.objects.BlockonomicsCallbackSettings;
 import me.aaronakhtar.blockonomics_wrapper.objects.transaction.CallbackTransaction;
 import me.aaronakhtar.invocord.GeneralUtilities;
+import me.aaronakhtar.invocord.Invocord;
+import me.aaronakhtar.invocord.objects.Invoice;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +32,15 @@ public class TransactionListener extends Thread {
             public void run() {
                 transactions.add(transaction);
 
+                for (Invoice invoice : Invocord.invoices){
+                    if (!invoice.isPaid() && invoice.getPaymentAddress().equals(transaction.getAddress())){
+                        final long neededSatoshis = BlockonomicsUtilities.bitcoinToSatoshi(invoice.getBitcoinAmount());
+                        if (transaction.getAmount() >= neededSatoshis){
+                            invoice.setPaid(true);
 
-                //todo - check for invoices etc
+                        }
+                    }
+                }
 
             }
         };

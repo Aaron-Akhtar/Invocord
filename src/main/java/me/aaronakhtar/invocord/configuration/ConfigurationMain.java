@@ -2,6 +2,7 @@ package me.aaronakhtar.invocord.configuration;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import me.aaronakhtar.invocord.GeneralUtilities;
 import me.aaronakhtar.invocord.Invocord;
 
 import java.io.File;
@@ -11,7 +12,9 @@ import java.io.IOException;
 
 public class ConfigurationMain {
 
-    public static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    //todo - create persistent file writer objects rather than creating new ones.
+
+    public static Gson gson = new GsonBuilder().setPrettyPrinting().create();
     protected static final File configurationDirectory = new File("./" + Invocord.name);
     public static final File mainConfigurationFile = new File(configurationDirectory.getAbsolutePath() + "/config.json");
 
@@ -21,7 +24,7 @@ public class ConfigurationMain {
             fileWriter.flush();
             return true;
         }catch (Exception e){
-            e.printStackTrace();
+            GeneralUtilities.handleException(e);
         }
         return false;
     }
@@ -32,10 +35,10 @@ public class ConfigurationMain {
             try (FileReader fileReader = new FileReader(mainConfigurationFile)) {
                 return gson.fromJson(fileReader, ConfigurationMain.class);
             } catch (Exception e) {
-                e.printStackTrace();
+                GeneralUtilities.handleException(e);
             }
         }catch (Exception e){
-            e.printStackTrace();
+            GeneralUtilities.handleException(e);
         }
         return null;
     }

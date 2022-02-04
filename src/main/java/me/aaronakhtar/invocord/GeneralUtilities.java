@@ -7,7 +7,7 @@ public class GeneralUtilities {
     }
 
     public static void handleException(Exception e){
-        e.printStackTrace();
+        GeneralUtilities.handleException(e);
     }
 
 }

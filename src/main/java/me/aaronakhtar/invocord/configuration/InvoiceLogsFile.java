@@ -1,11 +1,16 @@
 package me.aaronakhtar.invocord.configuration;
 
 import me.aaronakhtar.blockonomics_wrapper.objects.transaction.CallbackTransaction;
+import me.aaronakhtar.invocord.GeneralUtilities;
 import me.aaronakhtar.invocord.objects.Invoice;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,18 +26,18 @@ public class InvoiceLogsFile {
         try {
             ConfigurationUtilities.checkConfigurationFile(invoiceLogsFile);
         } catch (Exception e) {
-            e.printStackTrace();
+            GeneralUtilities.handleException(e);
         }
         return invoiceLogsFile;
     }
 
     public static synchronized void updateInvoiceLogs(List<Invoice> invoices) {
         updatingLogs = true;
-        try (FileWriter fileWriter = new FileWriter(invoiceLogsFile)) {
-            ConfigurationMain.gson.toJson(ConfigurationMain.gson.toJson(invoices), fileWriter);
-            fileWriter.flush();
+        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(invoiceLogsFile.toURI()), StandardOpenOption.TRUNCATE_EXISTING)) {
+            ConfigurationMain.gson.toJson(invoices, writer);
+            writer.flush();
         } catch (Exception e) {
-            e.printStackTrace();
+            GeneralUtilities.handleException(e);
         }
         updatingLogs = false;
     }
@@ -43,7 +48,7 @@ public class InvoiceLogsFile {
                 Thread.sleep(500);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            GeneralUtilities.handleException(e);
         }
 
         List<Invoice> invoices = new ArrayList<>();
@@ -51,7 +56,7 @@ public class InvoiceLogsFile {
         try (FileReader fileReader = new FileReader(invoiceLogsFile)) {
             invoiceArray = ConfigurationMain.gson.fromJson(fileReader, Invoice[].class);
         } catch (Exception e) {
-            e.printStackTrace();
+            GeneralUtilities.handleException(e);
         }
         if (invoiceArray != null || invoiceArray.length != 0)
             invoices = Arrays.asList(invoiceArray);
