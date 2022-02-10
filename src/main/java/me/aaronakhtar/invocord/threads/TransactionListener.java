@@ -4,6 +4,7 @@ import me.aaronakhtar.blockonomics_wrapper.Blockonomics;
 import me.aaronakhtar.blockonomics_wrapper.BlockonomicsUtilities;
 import me.aaronakhtar.blockonomics_wrapper.objects.BlockonomicsCallbackSettings;
 import me.aaronakhtar.blockonomics_wrapper.objects.transaction.CallbackTransaction;
+import me.aaronakhtar.blockonomics_wrapper.objects.transaction.TransactionStatus;
 import me.aaronakhtar.invocord.GeneralUtilities;
 import me.aaronakhtar.invocord.Invocord;
 import me.aaronakhtar.invocord.objects.Invoice;
@@ -15,6 +16,8 @@ import static me.aaronakhtar.invocord.Invocord.blockonomics;
 
 public class TransactionListener extends Thread {
     public static volatile boolean listen = false;
+    private volatile boolean listening = false;
+
     public static final List<CallbackTransaction> transactions = new ArrayList<>();
 
     private int callbackPort;
@@ -26,22 +29,32 @@ public class TransactionListener extends Thread {
         listen = true;
     }
 
+    public void awaitListening(){
+        while(!listening);
+    }
+
     private static Runnable handleTransaction(CallbackTransaction transaction){
         return new Runnable() {
             @Override
             public void run() {
-                transactions.add(transaction);
+                if (transaction.getStatus() != TransactionStatus.UNCONFIRMED) {
+                    final List<Invoice> invoices = Invocord.invoices;
+                    // figure out a better way for this, maybe mapping
 
-                for (Invoice invoice : Invocord.invoices){
-                    if (!invoice.isPaid() && invoice.getPaymentAddress().equals(transaction.getAddress())){
-                        final long neededSatoshis = BlockonomicsUtilities.bitcoinToSatoshi(invoice.getBitcoinAmount());
-                        if (transaction.getAmount() >= neededSatoshis){
-                            invoice.setPaid(true);
-
+                    Invoice paidInvoice = null;
+                    for (Invoice invoice : invoices) {
+                        if (!invoice.isPaid() && invoice.getPaymentAddress().equals(transaction.getAddress().getAddress())) {
+                            final long neededSatoshis = BlockonomicsUtilities.bitcoinToSatoshi(invoice.getBitcoinAmount());
+                            if (transaction.getAmount() >= neededSatoshis) {
+                                transactions.add(transaction);  // only logging valid invoice transactions
+                                // create a dump log file for paid invoices
+                                invoice.setPaid(true);
+                                paidInvoice = invoice;
+                            }
                         }
                     }
+                    Invocord.invoices.remove(paidInvoice);
                 }
-
             }
         };
     }
@@ -57,6 +70,7 @@ public class TransactionListener extends Thread {
             Blockonomics.startCallbackServer(new BlockonomicsCallbackSettings[]{blockonomicsCallbackSettings}, callbackPort);
             try(AutoCloseable autoCloseable = () -> Blockonomics.stopCallbackServer()){
                 GeneralUtilities.log("Listening for new transactions...");
+                listening = true;
                 while(listen){
                     final CallbackTransaction transaction = blockonomics.listenForNewTransaction();
                     if (transaction != null){
@@ -66,6 +80,8 @@ public class TransactionListener extends Thread {
             }
         }catch (Exception e){
             GeneralUtilities.handleException(e);
+        }finally {
+            if (listening) listening = false;
         }
 
     }

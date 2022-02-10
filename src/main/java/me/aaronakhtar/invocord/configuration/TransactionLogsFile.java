@@ -56,7 +56,7 @@ public class TransactionLogsFile {
         } catch (Exception e) {
             GeneralUtilities.handleException(e);
         }
-        if (callbackTransactions != null || callbackTransactions.length != 0)
+        if (callbackTransactions != null && callbackTransactions.length != 0)
             transactions = Arrays.asList(callbackTransactions);
         return transactions;
     }

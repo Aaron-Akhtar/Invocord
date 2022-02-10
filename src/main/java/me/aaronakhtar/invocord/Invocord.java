@@ -10,7 +10,9 @@ import me.aaronakhtar.invocord.configuration.InvoiceLogsFile;
 import me.aaronakhtar.invocord.configuration.TransactionLogsFile;
 import me.aaronakhtar.invocord.objects.Invoice;
 import me.aaronakhtar.invocord.threads.TransactionListener;
+import me.aaronakhtar.invocord.threads.UpdaterThread;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,9 +23,8 @@ public class Invocord {
     public static ConfigurationMain configuration = null;
     public static BlockonomicsCallbackSettings blockonomicsCallbackSettings = null;
 
-    //todo preload transactions and invoices
-    public static final List<CallbackTransaction> transactions = new ArrayList<>();
-    public static final List<Invoice> invoices = new ArrayList<>();
+    public static List<CallbackTransaction> transactions = new ArrayList<>();
+    public static List<Invoice> invoices = new ArrayList<>();
 
     public static void main(String[] args) {
         // Actual DISCORD API integration will likely occur after most of the main stuff has been completed.
@@ -41,19 +42,21 @@ public class Invocord {
             TransactionLogsFile.getTransactionsLogFile();
             InvoiceLogsFile.getInvoiceLogFile();
 
+            transactions = TransactionLogsFile.getTransactions();
+            invoices = InvoiceLogsFile.getInvoices();
 
-            ConfigurationMain.gson = new Gson();    // disable pretty print after config creation
+
+            //ConfigurationMain.gson = new Gson();    // disable pretty print after config creation
 
             configuration = ConfigurationMain.getMainConfiguration();
             blockonomics = new Blockonomics(configuration.getBlockonomicsApiKey());
             blockonomicsCallbackSettings = new BlockonomicsCallbackSettings(blockonomics, "/listener", configuration.getSecretKey());
-            new TransactionListener(configuration.getPort(), blockonomicsCallbackSettings);
 
+            final TransactionListener transactionListener = new TransactionListener(configuration.getPort(), blockonomicsCallbackSettings);
+            transactionListener.start();
+            transactionListener.awaitListening();
 
-
-
-
-
+            //new UpdaterThread().start();
 
 
 

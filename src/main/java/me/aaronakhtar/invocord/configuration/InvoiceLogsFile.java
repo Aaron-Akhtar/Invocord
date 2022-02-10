@@ -58,7 +58,7 @@ public class InvoiceLogsFile {
         } catch (Exception e) {
             GeneralUtilities.handleException(e);
         }
-        if (invoiceArray != null || invoiceArray.length != 0)
+        if (invoiceArray != null && invoiceArray.length != 0)
             invoices = Arrays.asList(invoiceArray);
         return invoices;
     }
